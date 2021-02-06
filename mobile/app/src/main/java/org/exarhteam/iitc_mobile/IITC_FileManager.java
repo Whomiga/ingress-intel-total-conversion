@@ -183,7 +183,7 @@ public class IITC_FileManager {
 
         final InputStream data = prepareUserScript(stream);
 
-        return new WebResourceResponse("application/x-javascript", "UTF-8", data);
+        return new WebResourceResponse("application/javascript", "UTF-8", data);
     }
 
     private HashMap<String, String> getScriptInfo(final InputStream stream) {
@@ -206,7 +206,7 @@ public class IITC_FileManager {
 
         final InputStream data = prepareUserScript(stream);
 
-        return new WebResourceResponse("application/x-javascript", "UTF-8", data);
+        return new WebResourceResponse("application/javascript", "UTF-8", data);
     }
 
     private InputStream prepareUserScript(final InputStream stream) {
@@ -214,7 +214,7 @@ public class IITC_FileManager {
         final HashMap<String, String> info = getScriptInfo(content);
 
         final JSONObject jObject = new JSONObject(info);
-        final String gmInfo = "var GM_info={\"script\":" + jObject.toString() + "}";
+        final String gmInfo = "var GM_info={\"script\":" + jObject.toString() + "};\n";
 
         content = content.replace(WRAPPER_OLD, WRAPPER_NEW);
 
@@ -259,13 +259,13 @@ public class IITC_FileManager {
                     .setTitle(mActivity.getString(R.string.install_dialog_top))
                     .setMessage(Html.fromHtml(text))
                     .setCancelable(true)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(final DialogInterface dialog, final int which) {
                             copyPlugin(uri, invalidateHeaders);
                         }
                     })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(final DialogInterface dialog, final int which) {
                             dialog.cancel();
@@ -354,16 +354,16 @@ public class IITC_FileManager {
                 return;
             }
             new AlertDialog.Builder(mActivity)
-                    .setTitle("Plugin updated")
+                    .setTitle(mActivity.getString(R.string.plugin_updated))
                     .setMessage(scriptName)
                     .setCancelable(true)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(final DialogInterface dialog, final int which) {
                             dialog.cancel();
                         }
                     })
-                    .setNegativeButton("Reload", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(mActivity.getString(R.string.menu_reload), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(final DialogInterface dialog, final int which) {
                             dialog.cancel();
@@ -401,7 +401,7 @@ public class IITC_FileManager {
 
         private FileRequest(final Uri uri) {
             // create two connected streams we can write to after the file has been read
-            super("application/x-javascript", "UTF-8", new PipedInputStream());
+            super("application/javascript", "UTF-8", new PipedInputStream());
 
             try {
                 mStreamOut = new PipedOutputStream((PipedInputStream) getData());
@@ -421,10 +421,9 @@ public class IITC_FileManager {
             Log.d("Request permissions");
 
             try {
-                iitc.startActivityForResult(Intent.createChooser(target, "Choose file"), this);
+                iitc.startActivityForResult(Intent.createChooser(target, mActivity.getString(R.string.file_browser_choose_file)), this);
             } catch (final ActivityNotFoundException e) {
-                Toast.makeText(mActivity, "No activity to select a file found." +
-                        "Please install a file browser of your choice!", Toast.LENGTH_LONG).show();
+                Toast.makeText(mActivity, mActivity.getString(R.string.file_browser_is_required), Toast.LENGTH_LONG).show();
             }
         }
 
