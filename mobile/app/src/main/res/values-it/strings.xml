@@ -126,4 +126,25 @@
 \nIl vantaggio principale a differenza dell\'intel ingress map ufficiale è l\'abbondanza di plugins che espandono le sue capacità base.
 \n
 \nPuoi aggiungere plugins ufficiali o esterni dalle impostazioni.</string>
+    <string name="pane_alerts">Notifiche</string>
+    <string name="file_browser_is_required">Non ci sono attività nel selezionare un file trovato. Installa un file browser di tua scelta!</string>
+    <string name="plugins_permission_granted">Permesso garantito. Ripetere cortesemente l\'azione.</string>
+    <string name="appintro_layers_title">Strati/più salienti</string>
+    <string name="appintro_location_title">Permesso di geolocalizzazione</string>
+    <string name="pref_user_location_show_position_and_orientation">Mostra posizione utente e orientamento su mappa</string>
+    <string name="pref_user_location_show_position">Mostra posizione giocatore su mappa</string>
+    <string name="pref_hide_fullscreen_navigation_bar">Barra navigazione di sistema</string>
+    <string name="pref_hide_fullscreen_status_bar">Barra di Stato IITC</string>
+    <string name="pref_hide_fullscreen_action_bar">Barra Azioni IITC</string>
+    <string name="pref_hide_fullscreen_notification_bar">Barra Notifiche di Sistema</string>
+    <string name="pref_user_location_dont_show">Non mostrare la posizione utente</string>
+    <string name="appintro_navigation_description"> Scorri dal bordo sinistro del tuo schermo (oppure cliccla sull\'icona menu) per richiamare il <i>Navigation Drawer</i>.
+\nCliccare sull\'icona indietro per tornare alla mappa.
+\n
+\nAlcuniplugins (ad esempio <i>portals list</i> e <i>bookmarks</i>) ora compaiono su <i>Navigation Drawer</i> per un accesso veloce.
+\nNon appaiono più nel pannello informativo. </string>
+    <string name="pref_webview_zoom">Grandezza font</string>
+    <string name="pref_webview_zoom_defaultValue">Default di sistema</string>
+    <string name="pref_webview_zoom_sum">Influisce sulla grandezza di font/testi nel pannello delle informazioni, comm, finestre popup, etc…</string>
+    <string name="menu_plugins_add_url">Aggiungi plugin tramite URL</string>
 </resources>

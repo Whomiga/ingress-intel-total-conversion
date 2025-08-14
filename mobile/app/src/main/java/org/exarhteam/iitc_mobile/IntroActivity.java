@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
@@ -90,19 +89,13 @@ public class IntroActivity extends AppIntro implements OnLocaleChangedListener {
         super.onCreate(savedInstanceState);
 
         // App intro slides
-        addSlide(IntroSlide.newInstance(R.layout.intro_welcome));
-        addSlide(IntroSlide.newInstance(R.layout.intro_location));
+        addSlide(IntroSlide.createInstance(R.layout.intro_welcome));
+        addSlide(IntroSlide.createInstance(R.layout.intro_location));
         askForPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
 
-        final NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
-        if (nfc != null) {
-            addSlide(IntroSlide.newInstance(R.layout.intro_nfc));
-            askForPermissions(new String[]{Manifest.permission.NFC}, 3);
-        }
-
-        addSlide(IntroSlide.newInstance(R.layout.intro_navigation));
-        addSlide(IntroSlide.newInstance(R.layout.intro_layers));
-        addSlide(IntroSlide.newInstance(R.layout.intro_plugins));
+        addSlide(IntroSlide.createInstance(R.layout.intro_navigation));
+        addSlide(IntroSlide.createInstance(R.layout.intro_layers));
+        addSlide(IntroSlide.createInstance(R.layout.intro_plugins));
 
 
         setBarColor(ResourcesCompat.getColor(getResources(), R.color.iitc_blue_dark, null));

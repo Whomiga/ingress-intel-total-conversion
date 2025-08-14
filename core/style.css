@@ -64,7 +64,7 @@ i.large { font-size: 6rem; }
   top: 0;
   width: 340px;
   bottom: 45px;
-  z-index: 1001;
+  z-index: 3001;
   pointer-events: none;
 }
 
@@ -78,7 +78,6 @@ i.large { font-size: 6rem; }
   max-height: 100%;
   overflow-y:scroll;
   overflow-x:hidden;
-  z-index: 3000;
   pointer-events: auto;
 }
 
@@ -89,7 +88,7 @@ i.large { font-size: 6rem; }
   line-height: 10px;
   position: absolute;
   top: 108px;
-  z-index: 3001;
+  z-index: 3002;
   background-color: rgba(8, 48, 78, 0.9);
   color: #FFCE00;
   border: 1px solid #20A8B1;
@@ -100,11 +99,15 @@ i.large { font-size: 6rem; }
 }
 
 .enl {
-  color: #03fe03 !important;
+  color: #03fe03;
 }
 
 .res {
-  color: #00c5ff !important;
+  color: #00c5ff;
+}
+
+.mac {
+  color: #ff2020;
 }
 
 .none {
@@ -112,7 +115,7 @@ i.large { font-size: 6rem; }
 }
 
 .nickname {
-  cursor: pointer !important;
+  cursor: pointer;
 }
 
 a {
@@ -124,6 +127,22 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+.leaflet-control {
+  user-select: none; 
+}
+
+.leaflet-control-container .leaflet-top.leaflet-left {
+  width: 700px;  /* chat default width */
+  height: calc(100% - 126px); /* chat default start */
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-start;
+}
+
 
 .leaflet-control-layers-overlays label.disabled {
   text-decoration: line-through;
@@ -152,10 +171,40 @@ a:hover {
   display: none;
 }
 
-.leaflet-control-container .leaflet-bottom {
-  margin-bottom: 0 !important;
+
+/* shift controls when chat is expanded */
+.leaflet-left .leaflet-control.chat-expand {
+  margin-left: 720px;
 }
 
+/* leaflet controls */
+.leaflet-left, .leaflet-right {
+  display: grid;
+  grid-gap: 10px;
+  justify-items: baseline;
+}
+
+.leaflet-right {
+  justify-items: end;
+}
+
+.leaflet-left .leaflet-control,
+.leaflet-right .leaflet-control {
+  margin: 0;
+}
+
+.leaflet-top {
+  top: 10px;
+}
+.leaflet-right {
+  right: 10px;
+}
+.leaflet-bottom {
+  bottom: 10px;
+}
+.leaflet-left {
+  left: 10px;
+}
 
 .help {
   cursor: help;
@@ -208,7 +257,7 @@ a:hover {
 
 #chatcontrols a:first-child {
   letter-spacing:-1px;
-  text-decoration: none !important;
+  text-decoration: none;
 }
 
 #chatcontrols a.active {
@@ -226,15 +275,13 @@ a:hover {
 #chatcontrols .toggle {
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
+  border-bottom: 10px solid #FFCE00;
   margin: 6px auto auto;
 }
 
-#chatcontrols .expand {
-  border-bottom: 10px solid #FFCE00;
-}
-
-#chatcontrols .shrink {
+#chatcontrols.expand .toggle {
   border-top: 10px solid #FFCE00;
+  border-bottom: none;
 }
 
 #chatcontrols .loading {
@@ -307,16 +354,41 @@ em {
   table-layout: fixed;
   border-spacing: 0;
   border-collapse: collapse;
+  /* make the table always scrollable */
+  min-height: 100%;
+  margin-bottom: 1px;
+}
+
+/* expand last row if needed */
+#chat table tr:last-child {
+    height: 100%;
 }
 
 #chatinput table {
   height: 100%;
 }
 
+#chatinput.public mark,
+#chatinput.public input {
+  color: #f66;
+}
+
+#chatinput.alerts mark {
+  color: #bbb;
+}
+
 #chat td, #chatinput td {
   font-size: 13px;
   vertical-align: top;
   padding-bottom: 3px;
+}
+
+#chat .divider {
+  color: #bbb;
+}
+
+#chat .divider td:nth-child(2) {
+  text-align: center;
 }
 
 /* time */
@@ -340,8 +412,24 @@ em {
   white-space: nowrap;
 }
 
-#chat td .system_narrowcast {
-  color: #f66 !important;
+#chat td.system_narrowcast {
+  color: #f66;
+}
+
+#chatall tr.faction td:nth-child(3):before,
+#chatalerts tr.faction td:nth-child(3):before {
+  content: '[faction]';
+  color: #f88;
+  background-color: #500;
+  margin-right: .2rem;
+}
+
+#chatall tr.public td:nth-child(3):before,
+#chatalerts tr.public td:nth-child(3):before {
+  content: '[public]';
+  color: #ff6;
+  background-color: #550;
+  margin-right: .2rem;
 }
 
 mark {
@@ -354,17 +442,6 @@ mark {
   height: 1px;
   overflow:hidden;
   color: transparent;
-}
-
-/* divider */
-summary {
-  color: #bbb;
-  display: inline-block;
-  height: 16px;
-  overflow: hidden;
-  padding: 0 2px;
-  white-space: nowrap;
-  width: 100%;
 }
 
 #chatinput {
@@ -396,6 +473,9 @@ summary {
   padding:3px 4px 1px 4px;
 }
 
+.bidi-isolate {
+    unicode-bidi: isolate;
+}
 
 
 /* sidebar ************************************************************/
@@ -441,13 +521,16 @@ h2 {
 
 h2 #name {
   font-weight: 300;
+  display: inline;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+h2 #name .playername {
+  max-width: 70%;
   display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: top;
-  white-space: nowrap;
-  width: 205px;
-  position: relative;
 }
 
 h2 #stats {
@@ -459,16 +542,16 @@ h2 #stats {
 #signout {
   font-size: 12px;
   font-weight: normal;
-  line-height: 29px;
   padding: 0 4px;
-  position: absolute;
-  top: 0;
-  right: 0;
   background-color: rgba(8, 48, 78, 0.5);
   display: none; /* starts hidden */
+  vertical-align: text-top;
+}
+#name:hover .playername {
+  max-width: 50%;
 }
 #name:hover #signout {
-  display: block;
+  display: inline-block;
 }
 
 h2 sup, h2 sub {
@@ -479,22 +562,16 @@ h2 sup, h2 sub {
 
 
 /* gamestats */
-#gamestat {
-  height: 22px;
-}
-
 #gamestat span {
-  display: block;
-  float: left;
+  display: inline-block;
   font-weight: bold;
   cursor:help;
-  height: 21px;
-  line-height: 22px;
+  padding: 0 3px;
+  box-sizing: border-box;
 }
 
 #gamestat .res {
   background: #005684;
-  text-align: right;
 }
 
 #gamestat .enl {
@@ -524,52 +601,79 @@ input[type="search"], input[type="url"] {
 }
 #search {
   width: 100%;
-  padding-right: 24px;
+  padding-left: 24px;
+  padding-right: 36px;
 }
-#buttongeolocation {
+#search::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+#searchicon, #searchcancel, #buttongeolocation {
+  display: flex;
+  align-items: center;
   position: absolute;
-  right: 0;
-  top: 0;
   margin: 0;
   border: 0 none transparent;
-  padding: 0 2px 0 0;
+  padding: 0 2px;
   height: 24px;
   background-color: transparent;
 }
+#searchicon img, #searchcancel img, #buttongeolocation img {
+  height: 20px;
+}
+#searchicon {
+  left: 0;
+}
+#searchcancel {
+  right: 24px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#searchcancel.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+#buttongeolocation {
+  right: 0;
+  cursor: pointer;
+}
 #buttongeolocation:focus {
   outline: 1px dotted #ffce00;
-}
-#buttongeolocation img {
-  display: block;
-}
-#searchwrapper h3 {
-  font-size: 1em;
-  height: auto;
-  cursor: pointer;
 }
 .searchquery {
   max-height: 25em;
   overflow-y: auto;
 }
-#searchwrapper .ui-accordion-header::before {
-  font-size: 18px;
+#searchwrapper h3 {
+  padding: 0 0 0 25px;
+  position: relative;
+  font-size: 1em;
+  height: auto;
+  cursor: pointer;
+}
+#searchwrapper h3::before {
+  position: absolute;
+  left: 5px;
+  font-size: 14px;
   margin-right: 2px;
   font-weight: normal;
-  line-height: 1em;
-  content: "⊞";
+  content: "▲";
+  transition: transform 0.3s ease;
 }
-#searchwrapper .ui-accordion-header-active::before {
-  content: "⊟";
-}
-#searchwrapper .ui-accordion-content {
-  margin: 0;
-  overflow: hidden;
+#searchwrapper .searchquery.collapsed h3::before {
+  transform: rotate(180deg);
 }
 #searchwrapper ul {
-  padding-left: 14px;
+  max-height: 100%;
+  padding-left: 16px;
+  overflow: hidden;
 }
 #searchwrapper li {
   cursor: pointer;
+}
+#searchwrapper .searchquery.collapsed ul {
+  max-height: 0;
 }
 #searchwrapper li a {
   margin-left: -14px;
@@ -809,10 +913,14 @@ h3.title {
 }
 
 #toolbox {
+  display: none !important;
+}
+
+#toolbox, #toolbox_component {
   text-align: left;    /* centre didn't look as nice here as it did above in .linkdetails */
 }
 
-#toolbox > a {
+#toolbox > a, #toolbox_component > a {
   margin-left: 5px;
   margin-right: 5px;
   white-space: nowrap;
@@ -834,6 +942,23 @@ h3.title {
   cursor: pointer;
   color: #FFCE00;
   font-size: 16px;
+}
+
+/* history details */
+#historydetails {
+  text-align: center;
+  color: #ffce00;
+}
+
+#historydetails .missing {
+}
+
+#historydetails span {
+  color: #ff4a4a;
+}
+
+#historydetails span.completed {
+  color: #03fe03;
 }
 
 /* update status */
@@ -1092,25 +1217,28 @@ td + td {
 }
 */
 
+.pl_nudge_date:after {
+  background: no-repeat url(//commondatastorage.googleapis.com/ingress.com/img/nudge_pointy.png);
+  position:absolute;
+  content:"";
+  height:20px;
+  width: 5px;
+  right:-5px;
+  top:-1px
+}
+
 .pl_nudge_date {
   background-color: #724510;
   border-left: 1px solid #ffd652;
   border-bottom: 1px solid #ffd652;
   border-top: 1px solid #ffd652;
   color: #ffd652;
-  display: inline-block;
-  float: left;
+  display: block;
+  position:relative;
   height: 18px;
-  text-align: center;
-}
-
-.pl_nudge_pointy_spacer {
-  background: no-repeat url(//commondatastorage.googleapis.com/ingress.com/img/nudge_pointy.png);
-  display: inline-block;
-  float: left;
-  height: 20px;
-  left: 47px;
-  width: 5px;
+  width: 36px;
+  padding-left: 2px;
+  left: -2px;
 }
 
 .pl_nudge_player {
@@ -1137,9 +1265,33 @@ td + td {
   font-size:11px;
   background-color:#0E3C46;
   color:#ffce00;
-
 }
 
+.leaflet-control-scale {
+  order: -90;
+}
+
+.leaflet-bar {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  box-shadow: none;
+}
+
+.leaflet-bar a {
+  text-decoration: none;
+}
+
+.leaflet-control-zoom-in, .leaflet-control-zoom-out {
+  background-size: 18px;
+  font-size: 0 !important;
+}
+
+.leaflet-control-zoom-in {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M9 3v12M3 9h12' stroke='black' stroke-width='2.2' fill='none'/%3E%3C/svg%3E");
+}
+
+.leaflet-control-zoom-out {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M3.5 9h11' stroke='black' stroke-width='2.2' fill='none'/%3E%3C/svg%3E");
+}
 
 
 .portal_details th, .portal_details td {
@@ -1225,6 +1377,10 @@ table.artifact .portal {
   text-align: center;
 }
 
+.cursor_help {
+  cursor: help;
+}
+
 /* region scores */
 .cellscore .ui-accordion-header, .cellscore .ui-accordion-content {
 	border: 1px solid #20a8b1;
@@ -1250,7 +1406,7 @@ table.artifact .portal {
 
 /* prevent nonfunctional horizontal scrollbar in Chrome (perhaps jQuery issue) */
 .cellscore .historychart > div {
-  overflow: auto; 
+  overflow: auto;
 }
 
 .cellscore .logscale {
@@ -1372,4 +1528,28 @@ svg.icon-button {
 .leaflet-marker-icon > svg {
 	height: inherit;
 	width: inherit;
+}
+
+/* Warning text */
+.warning {
+  color: #f77;
+  font-weight: bold;
+  text-shadow: 1px 1px black, -1px -1px black;
+  text-align: center;
+}
+
+.ui-dialog-aboutIITC .plugin-is-standard {
+  color: darkgray;
+}
+
+.ui-dialog-aboutIITC .plugin-error {
+  text-decoration: line-through;
+}
+
+.ui-dialog-non-standard-intel .ui-dialog-buttonset button:first-child {
+  display: none;
+}
+
+.ui-dialog-non-standard-intel .ui-dialog-buttonset button:nth-child(2) {
+  float: left;
 }

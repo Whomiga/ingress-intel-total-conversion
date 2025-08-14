@@ -1,13 +1,29 @@
-// decode the on-network array entity format into an object format closer to that used before
-// makes much more sense as an object, means that existing code didn't need to change, and it's what the
-// stock intel site does internally too (the array format is only on the network)
+/* global log -- eslint */
 
+/**
+ * @file Decode the on-network array entity format into an object format closer to that used before
+ * makes much more sense as an object, means that existing code didn't need to change, and it's what the
+ * stock intel site does internally too (the array format is only on the network)
+ *
+ * @module entity_decode
+ */
 
-window.decodeArray = function(){};
+/**
+ * @namespace window.decodeArray
+ */
+window.decodeArray = function () {};
 
-
+/**
+ * Parses a mod array into an object.
+ *
+ * @function parseMod
+ * @param {Array} arr - The mod array.
+ * @returns {Object|null} Parsed mod object or null if the input is falsy.
+ */
 function parseMod(arr) {
-  if(arr == null) { return null; }
+  if (!arr) {
+    return null;
+  }
   return {
     owner: arr[0],
     name: arr[1],
@@ -15,16 +31,35 @@ function parseMod(arr) {
     stats: arr[3],
   };
 }
+
+/**
+ * Parses a resonator array into an object.
+ *
+ * @function parseResonator
+ * @param {Array} arr - The resonator array.
+ * @returns {Object|null} Parsed resonator object or null if the input is falsy.
+ */
 function parseResonator(arr) {
-  if(arr == null) { return null; }
+  if (!arr) {
+    return null;
+  }
   return {
     owner: arr[0],
     level: arr[1],
     energy: arr[2],
   };
 }
+
+/**
+ * Parses an artifact brief array into an object.
+ * @function parseArtifactBrief
+ * @param {Array} arr - The artifact brief array.
+ * @returns {Object|null} Parsed artifact brief object or null if the input is falsy.
+ */
 function parseArtifactBrief(arr) {
-  if (arr === null) return null;
+  if (!arr) {
+    return null;
+  }
 
   // array index 0 is for fragments at the portal. index 1 is for target portals
   // each of those is two dimensional - not sure why. part of this is to allow for multiple types of artifacts,
@@ -35,7 +70,7 @@ function parseArtifactBrief(arr) {
 
   function decodeArtifactArray(arr) {
     var result = {};
-    for (var i=0; i<arr.length; i++) {
+    for (var i = 0; i < arr.length; i++) {
       // we'll use the type as the key - and store any additional array values as the value
       // that will be an empty array for now, so only object keys are useful data
       result[arr[i][0]] = arr[i].slice(1);
@@ -49,10 +84,21 @@ function parseArtifactBrief(arr) {
   };
 }
 
+/**
+ * Parses an artifact detail array into an object.
+ *
+ * @function parseArtifactDetail
+ * @param {Array} arr - The artifact detail array.
+ * @returns {Object|null} Parsed artifact detail object or null if the input is falsy.
+ */
 function parseArtifactDetail(arr) {
-  if (arr == null) { return null; }
+  if (!arr) {
+    return null;
+  }
   // empty artifact data is pointless - ignore it
-  if (arr.length == 3 && arr[0] == "" && arr[1] == "" && arr[2].length == 0) { return null; }
+  if (arr.length === 3 && arr[0] === '' && arr[1] === '' && arr[2].length === 0) {
+    return null;
+  }
   return {
     type: arr[0],
     displayName: arr[1],
@@ -60,82 +106,159 @@ function parseArtifactDetail(arr) {
   };
 }
 
+/**
+ * Parses a history detail bit array into an object.
+ *
+ * @function parseHistoryDetail
+ * @param {number} bitarray - The history detail bit array.
+ * @returns {Object} Parsed history detail object.
+ */
+function parseHistoryDetail(bitarray) {
+  return {
+    _raw: bitarray,
+    visited: !!(bitarray & 1),
+    captured: !!(bitarray & 2),
+    scoutControlled: !!(bitarray & 4),
+  };
+}
 
-//there's also a 'placeholder' portal - generated from the data in links/fields. only has team/lat/lng
+// there's also a 'placeholder' portal - generated from the data in links/fields. only has team/lat/lng
 
-var CORE_PORTA_DATA_LENGTH = 4;
+var CORE_PORTAL_DATA_LENGTH = 4;
+
+/**
+ * Parses the core portal data from an array.
+ *
+ * @function corePortalData
+ * @param {Array} a - The portal data array.
+ * @returns {Object} An object containing the core data of a portal.
+ */
 function corePortalData(a) {
   return {
     // a[0] == type (always 'p')
-    team:          a[1],
-    latE6:         a[2],
-    lngE6:         a[3]
-  }
-};
+    team: a[1],
+    latE6: a[2],
+    lngE6: a[3],
+  };
+}
 
 var SUMMARY_PORTAL_DATA_LENGTH = 14;
+var DETAILED_PORTAL_DATA_LENGTH = SUMMARY_PORTAL_DATA_LENGTH + 4;
+var EXTENDED_PORTAL_DATA_LENGTH = DETAILED_PORTAL_DATA_LENGTH + 1;
+
+/**
+ * Parses the summary portal data from an array.
+ *
+ * @function summaryPortalData
+ * @param {Array} a - The portal data array.
+ * @returns {Object} An object containing the summary data of a portal.
+ */
 function summaryPortalData(a) {
   return {
-    level:         a[4],
-    health:        a[5],
-    resCount:      a[6],
-    image:         a[7],
-    title:         a[8],
-    ornaments:     a[9],
-    mission:       a[10],
+    level: a[4],
+    health: a[5],
+    resCount: a[6],
+    image: a[7],
+    title: a[8],
+    ornaments: a[9],
+    mission: a[10],
     mission50plus: a[11],
     artifactBrief: parseArtifactBrief(a[12]),
-    timestamp:     a[13]
+    timestamp: a[13],
   };
+}
+
+/**
+ * Parses the detailed portal data from an array.
+ *
+ * @function detailsPortalData
+ * @param {Array} a - The portal data array.
+ * @returns {Object} An object containing the detailed data of a portal.
+ */
+function detailsPortalData(a) {
+  return {
+    mods: a[SUMMARY_PORTAL_DATA_LENGTH].map(parseMod),
+    resonators: a[SUMMARY_PORTAL_DATA_LENGTH + 1].map(parseResonator),
+    owner: a[SUMMARY_PORTAL_DATA_LENGTH + 2],
+    artifactDetail: parseArtifactDetail(a[SUMMARY_PORTAL_DATA_LENGTH + 3]),
+  };
+}
+
+/**
+ * Parses the extended portal data from an array.
+ * @function extendedPortalData
+ * @param {Array} a - The portal data array.
+ * @returns {Object} An object containing the extended data of a portal.
+ */
+function extendedPortalData(a) {
+  return {
+    history: parseHistoryDetail(a[DETAILED_PORTAL_DATA_LENGTH] || 0),
+  };
+}
+
+window.decodeArray.dataLen = {
+  core: [CORE_PORTAL_DATA_LENGTH],
+  summary: [SUMMARY_PORTAL_DATA_LENGTH],
+  detailed: [EXTENDED_PORTAL_DATA_LENGTH, DETAILED_PORTAL_DATA_LENGTH],
+  extended: [EXTENDED_PORTAL_DATA_LENGTH, SUMMARY_PORTAL_DATA_LENGTH],
+  anyknown: [CORE_PORTAL_DATA_LENGTH, SUMMARY_PORTAL_DATA_LENGTH, DETAILED_PORTAL_DATA_LENGTH, EXTENDED_PORTAL_DATA_LENGTH],
 };
 
-var DETAILED_PORTAL_DATA_LENGTH = SUMMARY_PORTAL_DATA_LENGTH+4;
-
-
-window.decodeArray.portalSummary = function(a) {
-  if (!a) return undefined;
+/**
+ * Decodes an array of portal data into a more detailed object format.
+ *
+ * @function window.decodeArray.portal
+ * @param {Array} a - Array containing portal data.
+ * @param {string} [details='anyknown'] - The level of detail to decode.
+ *                                        Can be 'core', 'summary', 'detailed', 'extended', or 'anyknown'.
+ * @returns {Object} An object containing decoded portal data.
+ */
+window.decodeArray.portal = function (a, details) {
+  if (!a) {
+    log.warn('Argument not specified');
+    return;
+  }
 
   if (a[0] !== 'p') {
-    throw new Error('Error: decodeArray.portalSUmmary - not a portal');
+    throw new Error('decodeArray.portal: not a portal');
   }
 
-  if (a.length == CORE_PORTA_DATA_LENGTH) {
-    return corePortalData(a);
+  details = details || 'anyknown';
+  var expected = window.decodeArray.dataLen[details];
+  if (expected.indexOf(a.length) === -1) {
+    log.warn('Unexpected portal data length: ' + a.length + ' (' + details + ')');
   }
 
-  // NOTE: allow for either summary or detailed portal data to be passed in here, as details are sometimes
-  // passed into code only expecting summaries
-  if (a.length != SUMMARY_PORTAL_DATA_LENGTH && a.length != DETAILED_PORTAL_DATA_LENGTH) {
-    log.warn('Portal summary length changed - portal details likely broken!');
-    debugger;
+  var data = corePortalData(a);
+
+  if (a.length >= SUMMARY_PORTAL_DATA_LENGTH) {
+    $.extend(data, summaryPortalData(a));
   }
 
-  return $.extend(corePortalData(a), summaryPortalData(a));
-}
-
-window.decodeArray.portalDetail = function(a) {
-  if (!a) return undefined;
-
-  if (a[0] !== 'p') {
-    throw new Error('Error: decodeArray.portalDetail - not a portal');
+  if (a.length >= DETAILED_PORTAL_DATA_LENGTH) {
+    if (a[SUMMARY_PORTAL_DATA_LENGTH]) {
+      $.extend(data, detailsPortalData(a));
+    } else if (details === 'detailed') {
+      log.warn('Portal details missing');
+    }
   }
 
-  if (a.length != DETAILED_PORTAL_DATA_LENGTH) {
-    log.warn('Portal detail length changed - portal details may be wrong');
-    debugger;
+  if (a.length >= EXTENDED_PORTAL_DATA_LENGTH || details === 'extended' || details === 'detailed') {
+    $.extend(data, extendedPortalData(a));
+    if (data.history && data.history.captured && !data.history.visited) {
+      log.warn('Inconsistent history data found in portal "' + data.title + '"');
+    }
   }
 
-  //TODO look at the array values, make a better guess as to which index the mods start at, rather than using the hard-coded SUMMARY_PORTAL_DATA_LENGTH constant
+  return data;
+};
 
+window.decodeArray.portalSummary = function (a) {
+  // deprecated!!
+  return window.decodeArray.portal(a, 'summary');
+};
 
-  // the portal details array is just an extension of the portal summary array
-  // to allow for niantic adding new items into the array before the extended details start,
-  // use the length of the summary array
-  return $.extend(corePortalData(a), summaryPortalData(a),{
-    mods:      a[SUMMARY_PORTAL_DATA_LENGTH+0].map(parseMod),
-    resonators:a[SUMMARY_PORTAL_DATA_LENGTH+1].map(parseResonator),
-    owner:     a[SUMMARY_PORTAL_DATA_LENGTH+2],
-    artifactDetail:  parseArtifactDetail(a[SUMMARY_PORTAL_DATA_LENGTH+3]),
-  });
-  
-}
+window.decodeArray.portalDetail = function (a) {
+  // deprecated!!
+  return window.decodeArray.portal(a, 'detailed');
+};
