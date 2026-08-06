@@ -319,11 +319,11 @@ const escapeHtml = function (str, allowedTags = []) {
     return str.replace(/[&<>"']/g, (char) => escapeMap[char]);
   }
 
-  // Create pattern for allowed tags (self-closing and paired)
-  const allowedTagsPattern = new RegExp(`(<\\/?(?:${allowedTags.join('|')})>)`, 'g');
+  // Create pattern for allowed tags (opening with optional class attribute, closing, and self-closing)
+  const allowedTagsPattern = new RegExp(`^<\\/?(?:${allowedTags.join('|')})(?:\\s+class="[^"]*")?>$`);
 
-  // Split text by allowed tags to preserve them
-  const parts = str.split(allowedTagsPattern);
+  // Split text by all HTML tags to process each part individually
+  const parts = str.split(/(<[^>]*>)/g);
 
   return parts
     .map((part) => {
@@ -408,7 +408,7 @@ const textToTable = function (text) {
   for (const row of rows) {
     let rowHtml = '<tr>';
     for (let k = 0; k < row.length; k++) {
-      const cell = IITC.utils.escapeHtml(row[k], ['hr', 'br', 'b', 'i', 'strong', 'em']);
+      const cell = IITC.utils.escapeHtml(row[k], ['hr', 'br', 'b', 'i', 'strong', 'em', 'span', 'mark']);
       const colspan = k === 0 && row.length < columnCount ? ` colspan="${columnCount - row.length + 1}"` : '';
       rowHtml += `<td${colspan}>${cell}</td>`;
     }
@@ -515,6 +515,21 @@ const getTeamId = (input) => {
   return window.TEAM_NONE;
 };
 
+/**
+ * Checks whether a DOM element is currently visible, matching jQuery's ':visible' semantics
+ * (the element occupies space in the layout). Uses an offset-based test rather than inspecting
+ * the element's own `display`, so an element hidden through a `display:none` ancestor is correctly
+ * reported as not visible.
+ *
+ * @memberof IITC.utils
+ * @private
+ * @param {Element} element - The DOM element to test.
+ * @returns {boolean} True if the element is visible, false otherwise.
+ */
+const _isVisible = (element) => {
+  return !!element && (element.offsetWidth > 0 || element.offsetHeight > 0 || element.getClientRects().length > 0);
+};
+
 IITC.utils = {
   getURLParam,
   getCookie,
@@ -541,6 +556,7 @@ IITC.utils = {
   clampLatLngBounds,
   isPointInPolygon,
   getTeamId,
+  _isVisible,
 };
 
 // Map of legacy function names to their new names (or the same name if not renamed)
@@ -571,19 +587,4 @@ const legacyFunctionMappings = {
   teamStringToId: 'getTeamId',
 };
 
-// Set up synchronization between `window` and `IITC.utils` with new names
-Object.entries(legacyFunctionMappings).forEach(([oldName, newName]) => {
-  // Initialize IITC.utils[newName] if not already defined
-  window.IITC.utils[newName] = window.IITC.utils[newName] || function () {};
-
-  // Define a getter/setter on `window` to synchronize with `IITC.utils`
-  Object.defineProperty(window, oldName, {
-    get() {
-      return window.IITC.utils[newName];
-    },
-    set(newFunc) {
-      window.IITC.utils[newName] = newFunc;
-    },
-    configurable: true,
-  });
-});
+IITC.registerLegacyAliases(window.IITC.utils, legacyFunctionMappings);

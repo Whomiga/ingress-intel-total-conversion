@@ -1,6 +1,6 @@
 // @author         jonatkins
 // @name           IITC: Ingress intel map total conversion
-// @version        0.42.0
+// @version        0.42.2
 // @description    Total conversion for the ingress intel map.
 // @run-at         document-end
 
@@ -14,11 +14,55 @@
 const IITC = {};
 window.IITC = IITC;
 
+/**
+ * Registers backward-compatibility aliases on `window` for functions that have moved into an `IITC.*` namespace.
+ *
+ * For each `[oldName, newName]` pair it ensures `namespace[newName]` exists and defines a getter/setter
+ * on `window[oldName]` that stays in sync with `namespace[newName]`. This keeps legacy code that reads
+ * or overrides the old global working after a function has been moved into a namespace.
+ *
+ * @memberof IITC
+ * @function registerLegacyAliases
+ * @param {Object} namespace - Target namespace object holding the functions under their new names.
+ * @param {Object.<string, string>} mappings - Map of legacy global name to the new name within `namespace`.
+ */
+IITC.registerLegacyAliases = function (namespace, mappings) {
+  Object.entries(mappings).forEach(([oldName, newName]) => {
+    // Initialize the target so the alias is usable even before the module assigns the real function
+    namespace[newName] = namespace[newName] || function () {};
+
+    // Define a getter/setter on `window` to synchronize with the namespace
+    Object.defineProperty(window, oldName, {
+      get() {
+        return namespace[newName];
+      },
+      set(newFunc) {
+        namespace[newName] = newFunc;
+      },
+      configurable: true,
+    });
+  });
+};
+
 window.script_info = plugin_info;
 window.script_info.changelog = [
   {
+    version: '0.42.2',
+    changes: ['Fix LatLng instantiation in artifacts'],
+  },
+  {
+    version: '0.42.1',
+    changes: ['Fix drawn circles disappearing on refresh and failing to import'],
+  },
+  {
     version: '0.42.0',
-    changes: ['Update and supplement ingress constants for access points'],
+    changes: [
+      'Introduce IITC.statusbar API with modular template-based rendering for map and portal status',
+      'Add safe-area support for edge-to-edge displays on Android 15+ and iOS 11+',
+      'Fix portal range circles not updating after portal detail load',
+      'Fix restoring saved map layer for plugins loaded after map initialization',
+      'Update and supplement ingress constants for access points',
+    ],
   },
   {
     version: '0.41.0',
@@ -170,7 +214,7 @@ document.head.innerHTML =
   '<title>Ingress Intel Map</title>' +
   '<link rel="shortcut icon" href="/img/favicon.ico" />' +
   '<style>' +
-  '@include_css:external/jquery-ui-1.12.1-resizable.css@' +
+  '@include_css:external/jquery-ui-1.14.2-resizable.css@' +
   '</style>' +
   '<style>' +
   '@include_css:external/leaflet.css@' +
@@ -250,7 +294,7 @@ window.ZOOM_LEVEL_ADJ = 5;
  * @type {number}
  * @memberof config_options
  */
-window.ON_MOVE_REFRESH = 2.5;
+window.ON_MOVE_REFRESH = 0.4;
 
 /**
  * Limit on refresh time since previous refresh, limiting repeated move refresh rate, in seconds, default 10
@@ -274,33 +318,12 @@ window.REFRESH_GAME_SCORE = 15 * 60;
 window.MAX_IDLE_TIME = 15 * 60;
 
 /**
- * How much space to leave for scrollbars, in pixels, default 20.
- * @type {number}
- * @memberof config_options
- */
-window.HIDDEN_SCROLLBAR_ASSUMED_WIDTH = 20;
-
-/**
- * How wide should the sidebar be, in pixels, default 300.
- * @type {number}
- * @memberof config_options
- */
-window.SIDEBAR_WIDTH = 300;
-
-/**
  * Controls requesting chat data based on the pixel distance from the line currently in view
  * and the top of history, in pixels, default 200
  * @type {number}
  * @memberof config_options
  */
 window.CHAT_REQUEST_SCROLL_TOP = 200;
-
-/**
- * Controls height of chat when chat is collapsed, in pixels, default 60
- * @type {number}
- * @memberof config_options
- */
-window.CHAT_SHRINKED = 60;
 
 /**
  * What colour should the selected portal be, string(css hex code), default ‘#f0f’ (hot pink)
@@ -689,20 +712,6 @@ window.TEAM_CODE_MAC = window.TEAM_CODES[window.TEAM_MAC];
  * @memberof storage_variables
  */
 window.refreshTimeout = undefined;
-
-/**
- * Portal GUID if the original URL had it.
- * @type {string|null}
- * @memberof storage_variables
- */
-window.urlPortal = null;
-
-/**
- * Portal lng/lat if the orignial URL had it.
- * @type {object|null}
- * @memberof storage_variables
- */
-window.urlPortalLL = null;
 
 /**
  * Stores the GUID of the selected portal, or is `null` if there is none.

@@ -253,7 +253,7 @@ window.artifact.updateLayer = function () {
   window.artifact._layer.clearLayers();
 
   $.each(window.artifact.portalInfo, function (guid, data) {
-    var latlng = new L.LatLng([data._data.latE6 / 1e6, data._data.lngE6 / 1e6]);
+    var latlng = new L.LatLng(data._data.latE6 / 1e6, data._data.lngE6 / 1e6);
 
     $.each(data, function (type) {
       // we'll construct the URL form the type - stock seems to do that now
@@ -325,7 +325,7 @@ window.artifact.showArtifactList = function () {
       if (type in data) {
         // this portal has data for this artifact type - add it to the table
 
-        var onclick = "zoomToAndShowPortal('" + guid + "',[" + data._data.latE6 / 1e6 + ',' + data._data.lngE6 / 1e6 + '])';
+        var onclick = "IITC.portal.zoomToAndShow('" + guid + "',[" + data._data.latE6 / 1e6 + ',' + data._data.lngE6 / 1e6 + '])';
         var row = '<tr><td class="portal"><a onclick="' + onclick + '">' + window.escapeHtmlSpecialChars(data._data.title) + '</a></td>';
 
         row += '<td class="info">';

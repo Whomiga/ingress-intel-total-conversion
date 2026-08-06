@@ -30,6 +30,9 @@ window.setupTooltips = function (element) {
       // ensure all other tooltips are closed
       $('.ui-tooltip').not(ui.tooltip).remove();
     },
+    close: function () {
+      $('.ui-helper-hidden-accessible > *:not(:last)').remove();
+    },
     content: function () {
       var title = $(this).attr('title');
       return window.convertTextToTableMagic(title);
@@ -40,6 +43,7 @@ window.setupTooltips = function (element) {
     window.tooltipClearerHasBeenSetup = true;
     $(document).on('click', '.ui-tooltip', function () {
       $(this).remove();
+      $('.ui-helper-hidden-accessible > *:not(:last)').remove();
     });
   }
 };
@@ -288,16 +292,16 @@ function boot() {
   setupIngressMarkers();
   window.extractFromStock();
   window.setupIdle();
-  window.setupDataTileParams();
-  window.setupMap();
+  IITC.map.tiles.setupParams();
+  IITC.map.setup();
   window.setupOMS();
   window.ornaments.setup();
   window.layerChooser._lastPriority = 1000; // plugins overlays have priority >1000
   window.setupTooltips();
-  window.chat.setup();
+  IITC.chat.setup();
   window.updateGameScore();
   window.search.setup();
-  window.portalDetail.setup();
+  IITC.portal.details.setup();
   window.setupRedeem();
   window.setupSidebar();
   IITC.statusbar.init();
@@ -336,9 +340,11 @@ try {
   })({}).exports(L);
 
   // eslint-disable-next-line
-  '@include_raw:external/jquery-3.6.0.min.js@';
+  '@include_raw:external/jquery-4.0.0.min.js@';
   // eslint-disable-next-line
-  '@include_raw:external/jquery-ui-1.12.1.min.js@';
+  '@include_raw:external/jquery-migrate-4.0.2.js@';
+  // eslint-disable-next-line
+  '@include_raw:external/jquery-ui-1.14.2.min.js@';
   // eslint-disable-next-line
   '@include_raw:external/taphold.js@';
   // eslint-disable-next-line

@@ -1,4 +1,4 @@
-/* global L -- eslint */
+/* global IITC, L -- eslint */
 
 /**
  * Handles search-related hooks for the IITC.search module, adding various search result types.
@@ -64,11 +64,12 @@ window.addHook('search', (query) => {
         for (const [guid, portal] of Object.entries(window.portals)) {
           const { lat: pLat, lng: pLng } = portal.getLatLng();
           if (`${pLat.toFixed(6)},${pLng.toFixed(6)}` === latLngString) {
-            window.renderPortalDetails(guid);
+            IITC.portal.display.renderDetails(guid);
             return;
           }
         }
-        window.urlPortalLL = [result.position.lat, result.position.lng];
+
+        IITC.portal.selectWhenLoadedByLatLng(result.position);
       },
     });
   };
@@ -184,13 +185,13 @@ window.addHook('search', async (query) => {
 
   if (match) {
     const guid = match[0];
-    const data = window.portalDetail.get(guid);
+    const data = IITC.portal.details.get(guid);
 
     if (data) {
       window.search.addSearchResult(query, data, guid);
     } else {
       try {
-        const fetchedData = await window.portalDetail.request(guid);
+        const fetchedData = await IITC.portal.details.request(guid);
         window.search.addSearchResult(query, fetchedData, guid);
       } catch (error) {
         console.error('Error fetching portal details:', error);

@@ -1,13 +1,14 @@
 // @author         breunigs
 // @name           Player activity tracker
 // @category       Layer
-// @version        0.14.0
+// @version        0.14.1
 // @description    Draw trails for the path a user took onto the map based on status messages in COMMs. Uses up to three hours of data. Does not request chat data on its own, even if that would be useful.
 
 /* exported setup, changelog --eslint */
 /* global IITC, L -- eslint */
 
 var changelog = [
+  { version: '0.14.1', changes: ['Refactoring: update Leaflet API usage'] },
   {
     version: '0.14.0',
     changes: ['Using `IITC.utils.formatAgo` instead of the plugin own function', 'Refactoring to make it easier to extend plugin functions'],
@@ -128,11 +129,11 @@ window.plugin.playerTracker.zoomListener = function () {
     window.plugin.playerTracker.drawnTracesRes.clearLayers();
     ctrl.addClass('disabled').attr('title', 'Zoom in to show those.');
     // note: zoomListener is also called at init time to set up things, so we only need to do this in here
-    window.chat.backgroundChannelData('plugin.playerTracker', 'all', false); // disable this plugin's interest in 'all' COMM
+    IITC.chat.backgroundChannelData('plugin.playerTracker', 'all', false); // disable this plugin's interest in 'all' COMM
   } else {
     ctrl.removeClass('disabled').attr('title', '');
     // note: zoomListener is also called at init time to set up things, so we only need to do this in here
-    window.chat.backgroundChannelData('plugin.playerTracker', 'all', true); // enable this plugin's interest in 'all' COMM
+    IITC.chat.backgroundChannelData('plugin.playerTracker', 'all', true); // enable this plugin's interest in 'all' COMM
   }
 };
 
@@ -423,19 +424,19 @@ window.plugin.playerTracker.getPortalLink = function (data) {
   return $('<a>')
     .addClass('text-overflow-ellipsis')
     .css('max-width', '15em')
-    .text(window.chat.getChatPortalName(data))
+    .text(IITC.comm.getChatPortalName(data))
     .prop({
-      title: window.chat.getChatPortalName(data),
-      href: window.makePermalink(position),
+      title: IITC.comm.getChatPortalName(data),
+      href: IITC.portal.display.makePermalink(position),
     })
     .click(function (event) {
-      window.selectPortalByLatLng(position);
+      IITC.portal.selectByLatLng(position);
       event.preventDefault();
       return false;
     })
     .dblclick(function (event) {
       window.map.setView(position, window.DEFAULT_ZOOM);
-      window.selectPortalByLatLng(position);
+      IITC.portal.selectByLatLng(position);
       event.preventDefault();
       return false;
     });

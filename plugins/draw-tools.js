@@ -1,13 +1,14 @@
 // @author         breunigs
 // @name           Draw tools
 // @category       Draw
-// @version        0.12.0
+// @version        0.12.1
 // @description    Allow drawing things onto the current map so you may plan your next move. Supports Multi-Project-Extension.
 
 /* global IITC, L -- eslint */
 /* exported setup, changelog --eslint */
 
 var changelog = [
+  { version: '0.12.1', changes: ['Refactoring: update Leaflet API usage'] },
   {
     version: '0.11.0',
     changes: ['Add confirmation dialog', 'Fix portal snap positioning bug'],
@@ -409,7 +410,7 @@ window.plugin.drawTools.optCopy = function () {
       }
     });
     var stockUrl =
-      window.makePermalink(null, {
+      IITC.portal.display.makePermalink(null, {
         includeMapView: true,
         fullURL: true,
       }) +
@@ -616,13 +617,13 @@ window.plugin.drawTools.optReset = function () {
 };
 
 window.plugin.drawTools.snapToPortals = function () {
-  if (!window.getDataZoomTileParameters().hasPortals) {
+  if (!IITC.map.tiles.getDataZoomParameters().hasPortals) {
     if (!confirm('Not all portals are visible on the map. Snap to portals may move valid points to the wrong place. Continue?')) {
       return;
     }
   }
 
-  if (window.mapDataRequest.status.short !== 'done') {
+  if (IITC.map.request.status.short !== 'done') {
     if (!confirm('Map data has not completely loaded, so some portals may be missing. Do you want to continue?')) {
       return;
     }
